@@ -1,0 +1,14 @@
+# IDE
+.idea/
+
+# Binary
+vpn-lite
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
