@@ -24,10 +24,21 @@ func GenerateKeyPair() (*KeyPair, error) {
 	}
 	publicKey := privateKey.PublicKey()
 
+	//This line is for debugging and will be removed later
 	fmt.Println("ECDH Key Pair Generated Successfully!")
 
 	return &KeyPair{
 		Private: privateKey,
 		Public:  publicKey,
 	}, nil
+}
+
+// DerivedSharedSecret computes a shared secret using our private key and a peer's public key.
+// Both parties will derive the same secret, enabling secure symmetric encryption.
+func DerivedSharedSecret(ourPrivate *ecdh.PrivateKey, theirPublic *ecdh.PublicKey) ([]byte, error) {
+	sharedSecret, err := ourPrivate.ECDH(theirPublic)
+	if err != nil {
+		return nil, err
+	}
+	return sharedSecret, nil
 }
