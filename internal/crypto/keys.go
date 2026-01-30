@@ -1,3 +1,4 @@
+// Package crypto provides cryptographic utilities for secure VPN communication.
 package crypto
 
 import (
@@ -6,11 +7,15 @@ import (
 	"fmt"
 )
 
+// KeyPair holds an ECDH key pair used for secure key exchange between VPN peers.
 type KeyPair struct {
 	Private *ecdh.PrivateKey
 	Public  *ecdh.PublicKey
 }
 
+// GenerateKeyPair creates a new ECDH key pair using the P-256 curve.
+// The public key can be shared with peers to establish a shared secret,
+// while the private key must be kept secure.
 func GenerateKeyPair() (*KeyPair, error) {
 	privateKey, err := ecdh.P256().GenerateKey(rand.Reader)
 	if err != nil {
@@ -20,9 +25,6 @@ func GenerateKeyPair() (*KeyPair, error) {
 	publicKey := privateKey.PublicKey()
 
 	fmt.Println("ECDH Key Pair Generated Successfully!")
-	// For demonstration only: Avoid printing sensitive private key material in production.
-	fmt.Printf("Public Key : %x\n", publicKey.Bytes())
-	fmt.Printf("Private Key : %x\n", privateKey.Bytes())
 
 	return &KeyPair{
 		Private: privateKey,
