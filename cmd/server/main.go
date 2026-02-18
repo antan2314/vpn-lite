@@ -55,9 +55,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_ = serverClientSharedSecret
+	// Use shared secret to establish encrypted tunnel
+	incomingEncryptedMessageBuffer := make([]byte, 1024)
+	n, err = serverConn.Read(incomingEncryptedMessageBuffer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	incomingEncryptedMessage, err := crypto.Decrypt(serverClientSharedSecret, incomingEncryptedMessageBuffer[:n])
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(incomingEncryptedMessage)) //test to show decryption works
 
-	// TODO: Use shared secret to establish encrypted tunnel
 	// TODO: Handle multiple client connections
 	// TODO: Forward traffic through the VPN
 }

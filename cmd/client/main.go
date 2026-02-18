@@ -3,6 +3,7 @@
 package main
 
 import (
+	"crypto/ecdh"
 	"fmt"
 	"log"
 	"net"
@@ -26,7 +27,30 @@ func main() {
 	// Send the client's public key to the server for key exchange
 	clientDial.Write(clientKeyPair.Public.Bytes())
 
-	// TODO: Receive server's public key
-	// TODO: Derive shared secret using ECDH
-	// TODO: Establish encrypted tunnel
+	// Receive server's public key
+	buffer := make([]byte, 65)
+	n, err := clientDial.Read(buffer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Parse the server's public key
+	serverPublicKey, err := ecdh.P256().NewPublicKey(buffer[:n])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Derive shared secret using ECDH
+	clientServerSharedSecret, err := crypto.DerivedSharedSecret(clientKeyPair.Private, serverPublicKey)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Establish encrypted tunnel
+	message := []byte("hello world") //test message to make sure encryption and decryption function
+	encryptedMessage, err := crypto.Encrypt(clientServerSharedSecret, message)
+	if err != nil {
+		log.Fatal(err)
+	}
+	clientDial.Write(encryptedMessage)
+
 }
