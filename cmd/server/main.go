@@ -81,7 +81,19 @@ func main() {
 				log.Println("Decrypt error:", err)
 				break
 			}
-			fmt.Println(string(incomingEncryptedMessage)) //test to show decryption works
+			fmt.Print("Incoming client message: " + string(incomingEncryptedMessage)) //test to show decryption works
+
+			// Send a hardcoded acknowledgment back to the client, encrypted with the shared secret
+			responseMessage := []byte("Message Received.")
+			encryptedMessage, err := crypto.Encrypt(serverClientSharedSecret, responseMessage)
+			if err != nil {
+				log.Println("Encrypt error:", err)
+			}
+
+			_, err = serverConn.Write(encryptedMessage)
+			if err != nil {
+				log.Println("Write error:", err)
+			}
 		}
 		_ = serverConn.Close()
 		// TODO: Handle multiple client connections
