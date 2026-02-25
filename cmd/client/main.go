@@ -4,6 +4,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/ecdh"
 	"fmt"
 	"io"
@@ -40,6 +41,26 @@ func main() {
 	serverPublicKey, err := ecdh.P256().NewPublicKey(buffer[:n])
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Trust-on-first-use (TOFU) server identity verification:
+	// Hash the server's public key and compare it against a previously saved fingerprint.
+	// On first connection the fingerprint is saved; on subsequent connections a mismatch
+	// (e.g. MITM or server key change) terminates the connection.
+	serverPublicHash := crypto.Fingerprint(serverPublicKey.Bytes())
+	locateHashFile, err := os.ReadFile("server_fingerprint.txt")
+	if err != nil {
+		log.Println(err)
+		err = os.WriteFile("server_fingerprint.txt", []byte(serverPublicHash), 0644)
+		fmt.Println("First Connection - Saving server fingerprint.")
+		if err != nil {
+			log.Fatal(err) //will close the program if there is another error
+		}
+	} else if bytes.Equal(locateHashFile, []byte(serverPublicHash)) {
+		fmt.Println("Server fingerprint matches server public key. Proceeding with connection")
+	} else {
+		log.Println("Server fingerprint does not match. Terminating connection.")
+		os.Exit(1)
 	}
 
 	// Derive shared secret using ECDH

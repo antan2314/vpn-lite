@@ -13,6 +13,9 @@ import (
 
 func main() {
 	// Generate ECDH key pair for the server
+	// TODO: Load the key pair from a persistent, password-encrypted key file instead of
+	// regenerating on every startup. This will keep the server's public key stable so the
+	// client's saved fingerprint remains valid across restarts.
 	serverKeyPair, err := crypto.GenerateKeyPair()
 	if err != nil {
 		log.Fatal(err)
